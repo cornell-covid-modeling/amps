@@ -27,7 +27,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[],
-    extras_require= {
+    extras_require={
         "dev": []
     },
     python_requires='>=3.5',
