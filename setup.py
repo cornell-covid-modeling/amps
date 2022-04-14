@@ -26,7 +26,12 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[],
+    install_requires=[
+        "numpy>=1.20",
+        "pandas>=1.2",
+        "scipy>=1.6",
+        "sympy>=1.8"
+    ],
     extras_require={
         "dev": []
     },
