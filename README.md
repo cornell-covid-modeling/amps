@@ -8,3 +8,18 @@ requiring both deterministic and non-stochastic parameters. It is compatible
 with hierarchical parameter structures specified in either YAML or JSON format.
 Furthermore, parameters can be defined as the (simple) function of other
 parameters within YAML/JSON files reducing coupling and increasing readability.
+
+## Installation
+
+This Python package is not yet posted on [PyPI](https://pypi.org). Hence,
+the best way to get started is by cloning the repo and pip installing.
+
+```
+git clone git@github.com:cornell-covid-modeling/amps.git
+cd amps
+pip install -e .
+```
+
+## License
+
+Licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
