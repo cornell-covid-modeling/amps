@@ -11,4 +11,4 @@ parameters within YAML/JSON files reducing coupling and increasing readability.
 
 __author__ = "Cornell Covid Modeling Team"
 
-from .scenario import ScenarioFamily
+from .amps import ScenarioFamily
