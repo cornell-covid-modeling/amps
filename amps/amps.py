@@ -12,7 +12,7 @@ class Scale(Enum):
 
 
 # https://stackoverflow.com/a/54829922
-def set_for_keys(my_dict, key_arr, value):
+def _set_for_keys(my_dict, key_arr, value):
     """Set value at path in my_dict defined by key array."""
     current = my_dict
     for i in range(len(key_arr)):
@@ -29,72 +29,73 @@ def set_for_keys(my_dict, key_arr, value):
     return my_dict
 
 
-def flatten_dict(my_dict):
+def _flatten_dict(my_dict):
     """Flatten a dictionary."""
     return pd.json_normalize(my_dict, sep='/').iloc[0].to_dict()
 
 
-def unflatten_dict(my_dict):
+def _un_flatten_dict(my_dict):
     """Unflatten a dictionary."""
     result = {}
     for k,v in my_dict.items():
-        set_for_keys(result, k.split('/'), v)
+        _set_for_keys(result, k.split('/'), v)
     return result
+
+
+def _scale_val(val, scale):
+    """Scale the given value by the given scale."""
+    if scale == Scale.LINEAR.value:
+        return val
+    elif scale == Scale.LOG.value:
+        return np.exp(val)
+    else:
+        raise ValueError(f"Unsupported scale: {scale}")
+
+
+def _get_nominal(dist):
+    """Return the nominal value of a distribution."""
+    return _scale_val(dist["mu"], dist["scale"])
+
+
+def _get_sample(dist):
+    """Return a sample from the distribution."""
+    mu = dist["mu"]
+    std = dist["std"]
+    a, b = (dist["a"] - mu) / std, (dist["b"] - mu) / std
+    val = stats.truncnorm.rvs(a,b,mu,std)
+    return _scale_val(val, dist["scale"])
 
 
 class ScenarioFamily:
 
-    def __init__(self, nominal: Dict, prior: Dict):
+    def __init__(self, deterministic: Dict, stochastic: Dict):
         """Initialize a scenario family.
 
         Args:
-            nominal (Dict): Parameters whose value is known.
-            prior (Dict): Distributions of parameters in the prior.
+            deterministic (Dict): Parameters whose value is known explicitly.
+            stochastic (Dict): Parameters to be drawn from a distribution.
         """
-        self.flattened_nominal = flatten_dict(nominal)
-        self.prior = prior
-
-    @staticmethod
-    def _get_nominal(dist):
-        """Return the nominal value of a distribution."""
-        # TODO (hwr26): be careful here if extending to using other dists
-        if dist["scale"] == Scale.LINEAR.value:
-            return dist["mu"]
-        elif dist["scale"] == Scale.LOG.value:
-            return np.exp(dist["mu"])
-        else:
-            raise ValueError(f"Unsupported scale: {dist['scale']}")
-
-    @staticmethod
-    def _get_sample(dist):
-        """Return a sample from the distribution."""
-        mu = dist["mu"]
-        std = dist["std"]
-        a, b = (dist["a"] - mu) / std, (dist["b"] - mu) / std
-        val = stats.truncnorm.rvs(a,b,mu,std)
-        if dist["scale"] == Scale.LINEAR.value:
-            return val
-        elif dist["scale"] == Scale.LOG.value:
-            return np.exp(val)
-        else:
-            raise ValueError(f"Unsupported scale: {dist['scale']}")
+        self.flattened_deterministic = _flatten_dict(deterministic)
+        self.stochastic = stochastic
 
     def get_nominal_scenario(self):
         """Return the nominal scenario."""
-        flattened_scenario = self.flattened_nominal.copy()
-        nominal = {k:self._get_nominal(v) for k,v in self.prior.items()}
+        flattened_scenario = self.flattened_deterministic.copy()
+        nominal = {k:_get_nominal(v) for k,v in self.stochastic.items()}
+        flattened_scenario.update(nominal)
         for k,v in flattened_scenario.items():
-            if type(v) == str and k.split("/")[0] != "metagroup_names":
-                flattened_scenario[k] = parse_expr(v, nominal)
-        return unflatten_dict(flattened_scenario)
+            if type(v) == str and v[:6] == "parse:" and k.split("/")[0]:
+                flattened_scenario[k] = parse_expr(v[7:], flattened_scenario)
+        return _un_flatten_dict(flattened_scenario)
 
     def get_sampled_scenario(self):
-        """Return a scenario sampled from the prior."""
-        flattened_scenario = self.flattened_nominal.copy()
+        """Return a scenario sampled from the stochastic."""
+        flattened_scenario = self.flattened_deterministic.copy()
         samples = {}
-        for name, dist in self.prior.items():
-            samples[name] = self._get_sample(dist)
+        for name, dist in self.stochastic.items():
+            samples[name] = _get_sample(dist)
+        flattened_scenario.update(samples)
         for k,v in flattened_scenario.items():
-            if type(v) == str and k.split("/")[0] != "metagroup_names":
-                flattened_scenario[k] = parse_expr(v, samples)
-        return unflatten_dict(flattened_scenario)
+            if type(v) == str and v[:6] == "parse:" and k.split("/")[0]:
+                flattened_scenario[k] = parse_expr(v[7:], flattened_scenario)
+        return _un_flatten_dict(flattened_scenario)

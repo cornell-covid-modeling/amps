@@ -1,0 +1,13 @@
+linear_parameter:
+  scale: "linear"
+  a: 0
+  b: 1
+  mu: 0.5
+  std: 0.25
+
+log_parameter:
+  scale: "log"
+  a: -.inf
+  b: 0
+  mu: -0.6931471805599453
+  std: 0.1

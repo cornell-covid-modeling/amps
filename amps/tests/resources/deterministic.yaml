@@ -1,0 +1,19 @@
+string_parameter: "string"
+
+list_parameter:
+  - "item_1"
+  - "item_2"
+  - "item_3"
+
+hierarchical_parameter:
+  one:
+    A: 1
+    B: 2
+  two:
+    A: 3
+    B: 4
+
+some_parameter: 4
+relative_deterministic_parameter: "parse: some_parameter * 4"
+
+relative_stochastic_parameter: "parse: linear_parameter / 2"
