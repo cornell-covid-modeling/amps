@@ -30,16 +30,15 @@ setup(
         "numpy>=1.20",
         "pandas>=1.2",
         "scipy>=1.6",
-        "sympy>=1.8",
-        "pyyaml>=5.4",
-        "json5>=0.9.5"
+        "sympy>=1.8"
     ],
     extras_require={
         "dev": ['pytest>=5',
                 'mock>=3',
                 'coverage>=4.5',
                 'tox>=3',
-                "flake8>=3.9"]
+                "flake8>=3.9",
+                "pyyaml>=5.4"]
     },
     python_requires='>=3.5',
 )
