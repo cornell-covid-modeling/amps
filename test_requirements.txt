@@ -4,6 +4,7 @@ distlib==0.3.4
 filelock==3.6.0
 flake8==4.0.1
 iniconfig==1.1.1
+json5==0.9.6
 mccabe==0.6.1
 mock==4.0.3
 mpmath==1.2.1
@@ -19,6 +20,7 @@ pyparsing==3.0.8
 pytest==7.1.1
 python-dateutil==2.8.2
 pytz==2022.1
+PyYAML==6.0
 scipy==1.8.0
 six==1.16.0
 sympy==1.10.1
